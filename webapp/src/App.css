@@ -1,0 +1,96 @@
+* {
+    transition: all 0.3s;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.App {
+    text-align: center;
+}
+
+.App-logo {
+    animation: App-logo-spin infinite 20s linear;
+    height: 80px;
+}
+
+.App-header {
+    background-color: #222;
+    height: 150px;
+    padding: 20px;
+    color: white;
+}
+
+.App-title {
+    font-size: 1.5em;
+}
+
+.App-intro {
+    font-size: large;
+}
+
+@keyframes App-logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.device-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-list-header {
+    font-weight: bold;
+}
+
+.device-list-item {
+    display: block;
+}
+
+.device-list-item .brief .name {
+    cursor: pointer;
+    user-select: none;
+}
+
+.device-list-item .name:hover {
+    color: #0074D9;
+}
+
+.device-list-item .brief {
+    display: block;
+}
+
+.device-list-item .brief > * {
+    display: inline-block;
+    width: 50%;
+    padding: 0.5em;
+}
+
+.device-list-item .details {
+    display: none;
+    padding: 1em;
+    background-color: #ddd;
+}
+
+.device-list-item .details.visible {
+    display: block;
+}
+
+.device-list-item:nth-child(odd) {
+    background-color: #eee;
+}
+
+.device-list-item .detail-item > * {
+    display: inline-block;
+    width: 50%;
+}

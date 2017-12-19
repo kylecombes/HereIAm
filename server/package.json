@@ -1,0 +1,11 @@
+{
+  "name": "ip-overview-server",
+  "version": "1.0.0",
+  "description": "A server for headless devices to report their dynamic IP addresses to to make connecting to them easier.",
+  "main": "index.mjs",
+  "author": "Kyle Combes <kylecmbes@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
