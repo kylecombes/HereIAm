@@ -2,12 +2,15 @@ from os import environ
 import json
 import netifaces
 import platform
+import re
 import requests
 from wifi import Cell
 from wifi.exceptions import InterfaceError
 
 
 class IPReporter:
+
+    IPV4_PATTERN = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}')
 
     def __init__(self, server, daemon_mode=True):
         """
@@ -21,24 +24,34 @@ class IPReporter:
         requests.post(self.server + '/report-ip', data=data)
 
     def get_interfaces(self, json_encode=False, exclude_lo=True):
-        ifaces = []
+        ifaces = {}
         for iface in netifaces.interfaces():
             if exclude_lo and iface == 'lo':
                 continue
-            address = netifaces.ifaddresses(iface)[2][0]
-            iface_data = {
-                'name': iface,
-                'address': address['addr'],
-                'netmask': address['netmask']
-            }
-            try:  # If this interface is a WiFi interface, get its info
-                wifi = self.get_wifi_info(iface)
-                iface_data['wifi'] = wifi
-            except InterfaceError:
-                pass
-            ifaces.append(iface_data)
+            for interface in list(netifaces.ifaddresses(iface).values()):
+                address = interface[0]
+                if 'netmask' not in address:  # Not a connected interface
+                    continue
 
-        return json.dumps(ifaces) if json_encode else ifaces
+                # Start a new dictionary unless we're looking at an interface we've already seen
+                iface_data = {'name': iface} if iface not in ifaces else ifaces[iface]
+
+                addr = address['addr']
+                if self.IPV4_PATTERN.match(addr):  # IPv4 address
+                    iface_data['addressIPv4'] = addr
+                    iface_data['netmaskIPv4'] = address['netmask']
+                else:  # IPv6 address
+                    iface_data['addressIPv6'] = addr
+                    iface_data['netmaskIPv6'] = address['netmask']
+
+                try:  # If this interface is a WiFi interface, get its info
+                    wifi = self.get_wifi_info(iface)
+                    iface_data['wifi'] = wifi
+                except InterfaceError:
+                    pass
+                ifaces[iface] = iface_data
+
+        return json.dumps(list(ifaces.values())) if json_encode else ifaces
 
     def get_wifi_info(self, iface):
         info = list(Cell.all(iface))[0]

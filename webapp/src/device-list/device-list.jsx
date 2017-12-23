@@ -1,36 +1,45 @@
 import React from "react";
 import DeviceListItem from "./device-list-item";
+import SocketIOClient from "socket.io-client";
 
 export default class DeviceList extends React.Component {
 
     constructor(props) {
         super(props);
 
-        // Open WebSocket connection to server
-        this.ws = new WebSocket(props.server);
-        this.ws.addEventListener('message', this.serverMessageReceived);
+        this.state = {
+            devices: [],
+        };
     }
 
+    componentDidMount = () => {
+
+        // Open WebSocket connection to server
+        const devicesSocket = SocketIOClient.connect('ws://localhost:1996');
+        devicesSocket.on('connect', () => console.log('Connected to server'));
+        devicesSocket.on('greeting', this.serverMessageReceived);
+        devicesSocket.on('devices', (msg) => {
+            const stateUpdate = { devices: msg };
+            console.log(stateUpdate)
+            this.setState(stateUpdate);
+        });
+    };
+
     serverMessageReceived = (msg) => {
-        console.log('Received message:');
+        console.log('Server says:');
         console.log(msg);
     };
 
     render() {
 
         let devices = [];
-        for (let k in this.props.devices) {
-            const device = this.props.devices[k];
-            devices.push(<DeviceListItem
-                name={device.hostname}
-                ipAddress={device.ipAddress}
-                os={device.os}
-            />);
-        }
+
+        this.state.devices.forEach((device) => {
+            devices.push(<DeviceListItem key={device.name} info={device} className="cell small-12"/>);
+        });
 
         return (
             <div className="device-list">
-                <DeviceListItem className="device-list-header" name="Name" ipAddress="IP Address" os="OS"/>
                 {devices}
             </div>
         )

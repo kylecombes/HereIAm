@@ -3,7 +3,7 @@ import BodyParser from "body-parser";
 import http from "http";
 import MongoClient from "mongodb";
 import util from "util";
-import WebSocket from 'ws';
+import SocketIO from 'socket.io';
 
 // Configuration
 
@@ -51,6 +51,9 @@ if (!(username && password && cluster1 && cluster2 && cluster3 && dbName && repl
 // console.log('Connecting to MongoDB using ' + mongoUri);
 const mongoUri = `mongodb://${username}:${password}@${cluster1}:${mongoPort},${cluster2}:${mongoPort},${cluster3}:${mongoPort}/${dbName}?ssl=true&replicaSet=${replicaSet}&authSource=${authSource}`;
 
+let devices = null;
+let broadcastDevices = null;
+
 // Connect to the MongoDB database
 MongoClient.connect(mongoUri, (err, db) => {
     if (err) { // There was a problem connecting to the MongoDB instance
@@ -59,6 +62,8 @@ MongoClient.connect(mongoUri, (err, db) => {
     } else { // Connected to db successfully
         console.log('Successfully connected to MongoDB instance. Starting HTTP server...');
 
+        updateDeviceListCache(db);
+
         const router = express.Router();
         app.use(router);
 
@@ -66,6 +71,7 @@ MongoClient.connect(mongoUri, (err, db) => {
             console.log('Received post to /report-ip:');
 
             const data = parseReportingTransmission(req.body);
+            console.log(util.inspect(data, false, null));
             if (data) {
                 db.collection('devices').insertOne(data, (err, dbRes) => {
                     if (err) {
@@ -73,6 +79,7 @@ MongoClient.connect(mongoUri, (err, db) => {
                         console.error(err);
                     } else {
                         res.sendStatus(300);
+                        updateDeviceListCache(db);
                     }
                 });
             } else {
@@ -84,15 +91,27 @@ MongoClient.connect(mongoUri, (err, db) => {
         console.log('API server started successfully. Starting WebSocket server...');
 
         // Configure WebSocket server
-        const wss = new WebSocket.Server({server});
+        const io = new SocketIO(server);
         // const connectedClients = [];
-        wss.on('connection', (ws) => {
+        io.on('connection', (ws) => {
             console.log('Client connected');
+            if (devices) {
+                ws.emit('devices', devices);
+            }
         });
-        wss.on('close', () => {
+        io.on('close', () => {
             console.log('Client disconnected');
         });
-
+        broadcastDevices = (msg) => {
+            const connectedDevices = Object.values(io.sockets.connected);
+            if (connectedDevices.length > 0) {
+                connectedDevices.forEach((ws) => {
+                    console.log('Transmitting update...')
+                    ws.emit('devices', msg);
+                    console.log('Transmission complete')
+                });
+            }
+        };
         console.log(`HTTP and WebSocket servers started successfully. Listening on port ${port}.`)
     }
 });
@@ -129,4 +148,21 @@ function parseReportingTransmission(postData) {
     }
 
     return data;
+}
+
+function updateDeviceListCache(db) {
+    console.log('Updating device cache...');
+    db.collection('devices').find().sort({datetime: -1}).limit(20).toArray((err, items) => {
+        devices = items.map((dev) => {
+            return {
+                interfaces: dev.interfaces,
+                os: dev.os,
+                name: dev.hostname,
+            };
+        });
+        if (broadcastDevices) { // Not defined before WebSockets initialized
+            broadcastDevices(devices);
+        }
+
+    });
 }
