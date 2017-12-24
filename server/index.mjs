@@ -67,13 +67,14 @@ MongoClient.connect(mongoUri, (err, db) => {
         const router = express.Router();
         app.use(router);
 
-        router.post('/report-ip', (req, res) => {
-            console.log('Received post to /report-ip:');
-
+        router.put('/devices/:uuid', (req, res) => {
+            const uuid = req.params.uuid;
+            console.log(`Received put request for device ${uuid}`);
             const data = parseReportingTransmission(req.body);
-            console.log(util.inspect(data, false, null));
             if (data) {
-                db.collection('devices').insertOne(data, (err, dbRes) => {
+                const query = {uuid};
+                console.log(query)
+                db.collection('devices').update(query, data, {upsert: true}, (err, dbRes) => {
                     if (err) {
                         res.sendStatus(500);
                         console.error(err);
@@ -106,9 +107,7 @@ MongoClient.connect(mongoUri, (err, db) => {
             const connectedDevices = Object.values(io.sockets.connected);
             if (connectedDevices.length > 0) {
                 connectedDevices.forEach((ws) => {
-                    console.log('Transmitting update...')
                     ws.emit('devices', msg);
-                    console.log('Transmission complete')
                 });
             }
         };
@@ -147,6 +146,11 @@ function parseReportingTransmission(postData) {
         return null;
     }
 
+    // Save the create/update time TODO Deal with timezones
+    data['timestamp'] = new Date();
+
+    data['uuid'] = postData['uuid'];
+
     return data;
 }
 
@@ -158,9 +162,12 @@ function updateDeviceListCache(db) {
                 interfaces: dev.interfaces,
                 os: dev.os,
                 name: dev.hostname,
+                timestamp: dev.timestamp,
+                uuid: dev.uuid,
             };
         });
         if (broadcastDevices) { // Not defined before WebSockets initialized
+            console.log(devices);
             broadcastDevices(devices);
         }
 

@@ -1,92 +1,116 @@
-from os import environ
 import json
 import netifaces
+from os import environ
+import os
 import platform
 import re
 import requests
+import uuid
 from wifi import Cell
 from wifi.exceptions import InterfaceError
 
 
-class IPReporter:
+IPV4_PATTERN = re.compile('^\d{1,3}\.\d{1,3}\.\d{1,3}.\d{1,3}$')
 
-    IPV4_PATTERN = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}')
 
-    def __init__(self, server, daemon_mode=True):
-        """
-        Creates a new IP reporter
-        :param server: the URL of the server
-        :param daemon_mode: whether or not to keep running this process indefinitely as a daemon process
-        """
-        self.server = server
+def report():
+    url = '{}/devices/{}'.format(server, uid)
+    print(url)
+    requests.put(url, data=data)
 
-    def report(self, data):
-        requests.post(self.server + '/report-ip', data=data)
 
-    def get_interfaces(self, json_encode=False, exclude_lo=True):
-        ifaces = {}
-        for iface in netifaces.interfaces():
-            if exclude_lo and iface == 'lo':
+def get_interfaces(json_encode=False, exclude_lo=True):
+    ifaces = {}
+    for iface in netifaces.interfaces():
+        if exclude_lo and iface == 'lo':
+            continue
+        for interface in list(netifaces.ifaddresses(iface).values()):
+            address = interface[0]
+            if 'netmask' not in address:  # Not a connected interface
                 continue
-            for interface in list(netifaces.ifaddresses(iface).values()):
-                address = interface[0]
-                if 'netmask' not in address:  # Not a connected interface
-                    continue
 
-                # Start a new dictionary unless we're looking at an interface we've already seen
-                iface_data = {'name': iface} if iface not in ifaces else ifaces[iface]
+            # Start a new dictionary unless we're looking at an interface we've already seen
+            iface_data = {'name': iface} if iface not in ifaces else ifaces[iface]
 
-                addr = address['addr']
-                if self.IPV4_PATTERN.match(addr):  # IPv4 address
-                    iface_data['addressIPv4'] = addr
-                    iface_data['netmaskIPv4'] = address['netmask']
-                else:  # IPv6 address
-                    iface_data['addressIPv6'] = addr
-                    iface_data['netmaskIPv6'] = address['netmask']
+            addr = address['addr']
+            if IPV4_PATTERN.match(addr):  # IPv4 address
+                iface_data['addressIPv4'] = addr
+                iface_data['netmaskIPv4'] = address['netmask']
+            else:  # IPv6 address
+                iface_data['addressIPv6'] = addr
+                iface_data['netmaskIPv6'] = address['netmask']
 
-                try:  # If this interface is a WiFi interface, get its info
-                    wifi = self.get_wifi_info(iface)
-                    iface_data['wifi'] = wifi
-                except InterfaceError:
-                    pass
-                ifaces[iface] = iface_data
+            try:  # If this interface is a WiFi interface, get its info
+                wifi = get_wifi_info(iface)
+                iface_data['wifi'] = wifi
+            except InterfaceError:
+                pass
+            ifaces[iface] = iface_data
 
-        return json.dumps(list(ifaces.values())) if json_encode else ifaces
-
-    def get_wifi_info(self, iface):
-        info = list(Cell.all(iface))[0]
-        res = {
-            'channel': info.channel,
-            'encryption': info.encryption_type,
-            'frequency': info.frequency,
-            'signalStrength': info.signal,
-            'ssid': info.ssid,
-            'quality': info.quality,
-        }
-        if info.noise:
-            res['noise'] = info.noise
-        return res
-
-    def get_os_info(self, json_encode=False):
-        res = {
-            'name': platform.system(),
-            'architecture': platform.machine()
-        }
-        if platform.system() == 'Linux':
-            res['dist'] = platform.linux_distribution()
-
-        return json.dumps(res) if json_encode else res
+    return json.dumps(list(ifaces.values())) if json_encode else ifaces
 
 
-if __name__ == '__main__':
-    server = environ.get('IP_REPORTER_SERVER')
-    if server:
-        rep = IPReporter(server)
-        data = {
-            'interfaces': rep.get_interfaces(True),
-            'hostname': platform.node(),
-            'os': rep.get_os_info(True)
-        }
-        rep.report(data)
-    else:
-        print('Error: IP_REPORTER_SERVER environment variable not set')
+def get_wifi_info(iface):
+    info = list(Cell.all(iface))[0]
+    res = {
+        'channel': info.channel,
+        'encryption': info.encryption_type,
+        'frequency': info.frequency,
+        'signalStrength': info.signal,
+        'ssid': info.ssid,
+        'quality': info.quality,
+    }
+    if info.noise:
+        res['noise'] = info.noise
+    return res
+
+
+def get_os_info(json_encode=False):
+    res = {
+        'name': platform.system(),
+        'architecture': platform.machine()
+    }
+    if platform.system() == 'Linux':
+        res['dist'] = platform.linux_distribution()
+
+    return json.dumps(res) if json_encode else res
+
+
+server = environ.get('IP_REPORTER_SERVER')
+if server:
+
+    # Determine this device's UID
+    homeDir = os.environ['HOME']
+    dataDir = os.path.join(homeDir, '.ifacereporter')
+    uidFilePath = os.path.join(dataDir, 'uid')
+
+    # Create ~/.ifacereporter if it does not exist
+    if not os.path.exists(dataDir):
+        os.makedirs(dataDir)
+
+    if os.path.isfile(uidFilePath):  # Read the UUID if one already exists
+        f = open(uidFilePath, 'r')
+        try:
+            uid = f.read()
+            print('Read UUID:', uid)
+        finally:
+            f.close()
+    else:  # Generate and save a UUID if one does not already exist
+        uid = uuid.uuid4()  # Generate random unique identifier
+        f = open(uidFilePath, 'w+')
+        try:
+            print('Attempting to write {} to {}'.format(uid, uidFilePath))
+            f.write(str(uid))
+            print('Successfully wrote to file')
+        finally:
+            f.close()
+
+    data = {
+        'interfaces': get_interfaces(True),
+        'hostname': platform.node(),
+        'os': get_os_info(True),
+        'uuid': uid
+    }
+    report()
+else:
+    print('Error: IP_REPORTER_SERVER environment variable not set')

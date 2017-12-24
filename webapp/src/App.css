@@ -1,7 +1,8 @@
 * {
+    -webkit-transition: all 0.3s;
+    -o-transition: all 0.3s;
     transition: all 0.3s;
     -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 
@@ -9,10 +10,19 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+    background-color: #f8fbff;
+}
+
+header .title {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0.5em 0;
 }
 
 .device-list {
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-direction: column;
     flex-direction: column;
 }
 
@@ -20,17 +30,73 @@ body {
     font-weight: bold;
 }
 
-.device-list-item {
-    display: block;
+.details-content {
+    padding: 1.5em;
 }
 
-.device-list-item .brief .name {
+.os,
+.reported {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.reported {
+    text-align: right;
+}
+
+.subsection-title {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.subsection-title {
+    margin-top: 0.8em;
+}
+
+.section-title {
+    margin-top: 0;
+}
+
+.iface-info:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
+
+.iface-general,
+.iface-wifi,
+.operating-system {
+    padding: 0.5em 0 1em 0;
+    flex-direction: column;
+}
+
+
+.iface-info:last-child .iface-general,
+.iface-info:last-child .iface-wifi {
+    padding-bottom: 0;
+}
+
+.device-list-item {
+    display: block;
+    background-color: #2e9ef4;
+}
+
+.device-list-item:last-child {
+    border-bottom: 1px solid #ccc;
+}
+
+.device-list-item .name {
+    padding: 1em;
+    display: block;
     cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
+    color: white;
+    font-size: 1.1em;
 }
 
 .device-list-item .name:hover {
-    color: #0074D9;
+    color: #cbcbcb;
 }
 
 .device-list-item .brief {
@@ -43,18 +109,30 @@ body {
     padding: 0.5em;
 }
 
-.device-list-item .details {
+.details-container {
     display: none;
-    padding: 1em;
     background-color: #ddd;
 }
 
-.device-list-item .details.visible {
+.details-container.visible {
     display: block;
+    border-top: 3px solid #ddd;
+    background-color: white;
 }
 
-.device-list-item:nth-child(odd) {
-    background-color: #eee;
+.device-list-item:not(:last-child).visible {
+    border-bottom: 1px solid #ddd;
+}
+
+.name,
+.details-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.dbm {
+    color: #888;
+    margin-left: 0.3em;
 }
 
 .device-list-item .detail-item > * {

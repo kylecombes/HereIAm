@@ -9,8 +9,20 @@ export default class DeviceList extends React.Component {
 
         this.state = {
             devices: [],
+            expandedDevices: [],
         };
     }
+
+    toggleDeviceCollapsed = (uuid) => {
+        const expandedDevices = this.state.expandedDevices;
+        const index = expandedDevices.indexOf(uuid);
+        if (index > -1) { // Device was expanded, should be collapsed
+            expandedDevices.splice(index, 1);
+        } else { // Device was collapsed, should be visible
+            expandedDevices.push(uuid);
+        }
+        this.setState({expandedDevices});
+    };
 
     componentDidMount = () => {
 
@@ -35,7 +47,8 @@ export default class DeviceList extends React.Component {
         let devices = [];
 
         this.state.devices.forEach((device) => {
-            devices.push(<DeviceListItem key={device.name} info={device} className="cell small-12"/>);
+            const isExpanded = this.state.expandedDevices.indexOf(device.uuid) > -1;
+            devices.push(<DeviceListItem key={device.uuid} info={device} expanded={isExpanded} toggleCollapsed={this.toggleDeviceCollapsed} />);
         });
 
         return (
