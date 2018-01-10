@@ -81,7 +81,7 @@ if server:
 
     # Determine this device's UID
     homeDir = os.environ['HOME']
-    dataDir = os.path.join(homeDir, '.ifacereporter')
+    dataDir = os.path.join(homeDir, '.hereiam')
     uidFilePath = os.path.join(dataDir, 'uid')
 
     # Create ~/.ifacereporter if it does not exist

@@ -13,21 +13,51 @@ body {
     background-color: #f8fbff;
 }
 
+.section-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+header {
+    padding: 3em 0;
+    background-color: #3eabfb;
+    margin-bottom: 1em;
+    border-bottom: 4px solid #ddd;
+}
+
+header .section-content {
+    display: flex;
+    flex-direction: row;
+}
+
+header .text-container {
+    display: flex;
+    align-items: center;
+    align-content: flex-start;
+    text-align: left;
+    flex-direction: row;
+}
+
+header .logo {
+    display: flex;
+}
+
+header .logo svg {
+    width: auto;
+    height: 4em;
+}
+
 header .title {
     max-width: 1000px;
     margin: 0 auto;
     padding: 0.5em 0;
-}
-
-.device-list {
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-direction: column;
-    flex-direction: column;
+    flex: 1;
+    font-size: 3em;
 }
 
 .device-list-header {
-    font-weight: bold;
+    padding: 0.5em;
+    font-size: 1.8em;
 }
 
 .details-content {
@@ -76,11 +106,9 @@ header .title {
 
 .device-list-item {
     display: block;
-    background-color: #2e9ef4;
-}
-
-.device-list-item:last-child {
-    border-bottom: 1px solid #ccc;
+    border: 1px solid #ececec;
+    border-bottom-color: #ccc;
+    margin-bottom: 1em;
 }
 
 .device-list-item .name {
@@ -91,12 +119,13 @@ header .title {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    color: white;
+    color: #333;
     font-size: 1.1em;
+    background-color: #f5f5f5;
 }
 
 .device-list-item .name:hover {
-    color: #cbcbcb;
+    background-color: #dedede;
 }
 
 .device-list-item .brief {
@@ -118,16 +147,6 @@ header .title {
     display: block;
     border-top: 3px solid #ddd;
     background-color: white;
-}
-
-.device-list-item:not(:last-child).visible {
-    border-bottom: 1px solid #ddd;
-}
-
-.name,
-.details-content {
-    max-width: 1000px;
-    margin: 0 auto;
 }
 
 .dbm {

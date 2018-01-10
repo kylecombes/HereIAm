@@ -52,8 +52,15 @@ export default class DeviceList extends React.Component {
         });
 
         return (
-            <div className="device-list">
-                {devices}
+            <div className="device-list-container">
+                <div className="device-list-header">
+                    <div className="section-content">
+                        <span className="section-content">Devices</span>
+                    </div>
+                </div>
+                <div className="device-list">
+                    {devices}
+                </div>
             </div>
         )
     }

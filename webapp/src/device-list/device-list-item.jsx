@@ -5,7 +5,7 @@ import moment from "moment";
 export default class DeviceListItem extends React.Component {
 
     render() {
-        let className = 'device-list-item cell small-12 grid-x';
+        let className = 'device-list-item section-content';
         if (this.props.className) className = `${className} ${this.props.className}`;
 
         let detailsClassName = 'details-container cell small-12';
