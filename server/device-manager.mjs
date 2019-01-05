@@ -3,7 +3,7 @@ import Device from './device.mjs';
 export default class DeviceManager {
 
     /**
-     * Intantiates a new DeviceList object for keeping track of devices.
+     * Instantiates a new DeviceList object for keeping track of devices.
      * @param dbConn - a connection to a MongoDB database
      * @param {function} broadcastUpdate - a callback to be used when a device list update needs to be sent
      */
