@@ -11,7 +11,6 @@ export default class WebSocketServer {
         // Bind the current context to all methods
         this.start = this.start.bind(this);
         this.onClientConnect = this.onClientConnect.bind(this);
-        this.onClientConnect = this.onClientConnect.bind(this);
         this.registerMessageListener = this.registerMessageListener.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
         this.broadcastDevices = this.broadcastDevices.bind(this);
@@ -26,7 +25,7 @@ export default class WebSocketServer {
 
     onClientConnect(socket) {
         console.log('Client connected');
-        this.broadcastDevices(socket);
+        // this.broadcastDevices(socket);
         // Notify anyone interested in connection events
         this.messageReceivedListeners['connection'].forEach(callback => callback());
         // Register the disconnect event handler

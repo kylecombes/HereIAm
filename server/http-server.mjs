@@ -1,9 +1,9 @@
 // This file handles all HTTP requests
 
 import expose from './expose';
+import bodyParser from 'body-parser';
 import express from 'express';
 import http from 'http';
-import fs from 'fs';
 import indexHTML from '../index.html.mjs';
 
 export default class HttpServer {
@@ -20,6 +20,9 @@ export default class HttpServer {
         // Start the HTTP server
         this.app = express();
         this.server = http.Server(this.app);
+
+        // Parse JSON in request body automatically
+        this.app.use(bodyParser.json());
 
         // Add headers
         this.app.use(function (req, res, next) {
@@ -47,7 +50,7 @@ export default class HttpServer {
         this.app.put('/devices/:uuid', (req, res) => {
             const uuid = req.params.uuid;
             console.log(`Received put request for device ${uuid}`);
-            this.reportingMsgHandlers.forEach(handler => handler(uuid, req.body));
+            this.reportingMsgHandlers.forEach(handler => handler(uuid, req.body, res));
 
         });
 

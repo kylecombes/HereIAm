@@ -11,6 +11,7 @@ export default class DeviceManager {
         this.devices = [];
         this.dbConn = dbConn;
         this.broadcastUpdate = broadcastUpdate;
+        this.receivedReportMsg = this.receivedReportMsg.bind(this);
     }
 
     /**
@@ -41,14 +42,15 @@ export default class DeviceManager {
 
     /**
      * Handles responding to a POST request from the Python client.
+     * @param {string} uuid - the unique identifier of the reporting device
      * @param {object} msg - the POST request body
      * @param {object} res - the Express result object (must be used to avoid appearance of timeout to client)
      */
-    receivedReportMsg(msg, res) {
+    receivedReportMsg(uuid, msg, res) {
         let dev = new Device(msg);
         if (dev) {
             const query = {uuid};
-            this.dbConn.db.collection('devices').update(query, dev, {upsert: true}, (err, dbRes) => {
+            this.dbConn.db.collection('devices').replaceOne(query, dev.data, {upsert: true}, (err, dbRes) => {
                 if (err) {
                     res.sendStatus(500);
                     console.error(err);

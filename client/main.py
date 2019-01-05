@@ -1,3 +1,4 @@
+import argparse
 import json
 import netifaces
 from os import environ
@@ -16,7 +17,8 @@ IPV4_PATTERN = re.compile('^\d{1,3}\.\d{1,3}\.\d{1,3}.\d{1,3}$')
 def report():
     url = '{}/devices/{}'.format(server, uid)
     print(url)
-    requests.put(url, data=data)
+    print(data)
+    requests.put(url, json=data)
 
 
 def get_interfaces(json_encode=False, exclude_lo=True):
@@ -76,7 +78,19 @@ def get_os_info(json_encode=False):
     return json.dumps(res) if json_encode else res
 
 
-server = environ.get('IP_REPORTER_SERVER')
+# Try to get the server URI from an environment variable
+server = environ.get('HEREIAM_SERVER')
+
+# Parse any passed arguments
+parser = argparse.ArgumentParser(description='Reporting client for HereIAm'
+                                 + 'dynamic IP address reporter.')
+parser.add_argument('-s', '--server', help='the server address (overrides any '
+                    + 'set environment variable)')
+args = parser.parse_args()
+if args.server:
+    server = args.server
+
+
 if server:
 
     # Determine this device's UID
@@ -113,4 +127,4 @@ if server:
     }
     report()
 else:
-    print('Error: IP_REPORTER_SERVER environment variable not set')
+    print('Error: HEREIAM_SERVER environment variable not set')
