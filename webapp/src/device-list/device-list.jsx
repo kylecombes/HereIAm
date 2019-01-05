@@ -27,7 +27,7 @@ export default class DeviceList extends React.Component {
     componentDidMount = () => {
 
         // Open WebSocket connection to server
-        const devicesSocket = SocketIOClient.connect('ws://localhost:1996');
+        const devicesSocket = SocketIOClient.connect('ws://localhost:1234');
         devicesSocket.on('connect', () => console.log('Connected to server'));
         devicesSocket.on('greeting', this.serverMessageReceived);
         devicesSocket.on('devices', (msg) => {
