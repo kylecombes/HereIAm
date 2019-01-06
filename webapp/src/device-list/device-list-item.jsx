@@ -22,11 +22,7 @@ export default class DeviceListItem extends React.Component {
 
         let reportedString = '';
         const reported = moment(this.props.info.timestamp);
-        if (reported.date() === moment().date()) {
-            reportedString = reported.format('[at] h:mm a');
-        } else {
-            reportedString = reported.format('M/D [at] h:mm a')
-        }
+        reportedString = reported.format('M/D [at] h:mm a');
 
         return (
             <div className={className}>
