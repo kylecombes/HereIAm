@@ -1,6 +1,6 @@
 const path = require('path');
 const APP_DIR = path.resolve(__dirname, 'webapp', 'src');
-const BUILD_DIR = path.resolve(__dirname, 'public');
+const BUILD_DIR = __dirname;
 module.exports = {
   devServer: {
     historyApiFallback: true,
