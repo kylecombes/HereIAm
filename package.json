@@ -6,6 +6,8 @@
   "author": "Kyle Combes <kylecombes@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "webpack:deploy": "webpack --config=webpack.config.js -p",
+    "heroku-postbuild": "npm run webpack:deploy",
     "start": "webpack-dev-server -w --inline --hot",
     "build": "webpack",
     "test": "react-scripts test --env=jsdom",
