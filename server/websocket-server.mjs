@@ -46,9 +46,9 @@ export default class WebSocketServer {
 
     onDisconnect(socket) {
         console.log('Client disconnected');
-        if (this.messageReceivedListeners.hasOwnProperty('disconnect')) {
-            this.messageReceivedListeners['disconnect'].forEach(callback => callback());
-        }
+        // if (this.messageReceivedListeners.hasOwnProperty('disconnect')) {
+        //     this.messageReceivedListeners['disconnect'].forEach(callback => callback());
+        // }
     }
 
 

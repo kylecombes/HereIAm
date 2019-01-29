@@ -3,13 +3,10 @@ export default class DeviceManager {
     /**
      * Instantiates a new DeviceList object for keeping track of devices.
      * @param dbConn - a connection to a MongoDB database
-     * @param {function} broadcastUpdate - a callback to be used when a device list update needs to be sent
      */
-    constructor(dbConn, broadcastUpdate) {
+    constructor(dbConn) {
         this.devices = [];
         this.dbConn = dbConn;
-        this.broadcastUpdate = broadcastUpdate;
-        this.receivedReportMsg = this.receivedReportMsg.bind(this);
     }
 
     /**

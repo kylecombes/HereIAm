@@ -19,11 +19,12 @@ const dbConn = new DatabaseConnection();
 // Start the HTTP server
 const httpServer = new HttpServer(port);
 
-// Initialize the WebSockets server
-const wsServer = new WebSocketServer();
-
 // Create a DeviceManager to keep track of the device info
-const devMan = new DeviceManager(dbConn, wsServer.broadcastDevices);
+const devMan = new DeviceManager(dbConn);
+
+// Initialize the WebSockets server
+const wsServer = new WebSocketServer(devMan);
+
 httpServer.registerReceivedReportMsgHandler(devMan.receivedReportMsg);
 // wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
 
