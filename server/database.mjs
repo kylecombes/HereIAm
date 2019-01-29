@@ -62,4 +62,20 @@ export default class DatabaseConnection {
         return this.connected;
     }
 
+    saveDevice(uuid, data) {
+      const that = this;
+      return new Promise((resolve, reject) => {
+        const query = {uuid};
+        that.db.collection('devices').replaceOne(query, data, {upsert: true}, (err, dbRes) => {
+          if (err) {
+            reject(err);
+            console.error(err);
+          } else {
+            resolve();
+          }
+        });
+
+      })
+    }
+
 }

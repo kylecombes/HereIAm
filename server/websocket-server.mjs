@@ -2,11 +2,9 @@ import SocketIO from 'socket.io';
 
 export default class WebSocketServer {
 
-    constructor() {
+    constructor(deviceManager) {
         this.io = null;
-        this.messageReceivedListeners = {
-            'connection': [],
-        };
+        this.deviceManager = deviceManager;
 
         // Bind the current context to all methods
         this.start = this.start.bind(this);
@@ -25,12 +23,12 @@ export default class WebSocketServer {
 
     onClientConnect(socket) {
         console.log('Client connected');
-        // this.broadcastDevices(socket);
-        // Notify anyone interested in connection events
-        this.messageReceivedListeners['connection'].forEach(callback => callback());
         // Register the disconnect event handler
         socket.on('disconnect', () => this.onDisconnect(socket));
-
+        this.deviceManager.getDevices()
+          .then(devices => {
+            socket.emit('devices', devices);
+          });
     }
 
     /**
@@ -54,16 +52,15 @@ export default class WebSocketServer {
     }
 
 
-    broadcastDevices(msg, socket=null) {
-        if (socket) { // Just send the update to one device
-            socket.emit('devices', msg);
-        } else { // Send the update to all connected devices
+    broadcastDevices(msg, socket) {
+        this.deviceManager.getDevices()
+          .then(devices => {
             const connectedDevices = Object.values(this.io.sockets.connected);
             if (connectedDevices.length > 0) {
-                connectedDevices.forEach((ws) => {
-                    ws.emit('devices', msg);
-                });
+              connectedDevices.forEach((ws) => {
+                ws.emit('devices', msg);
+              });
             }
-        }
-    };
+          });
+    }
 }

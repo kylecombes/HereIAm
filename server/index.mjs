@@ -25,7 +25,7 @@ const wsServer = new WebSocketServer();
 // Create a DeviceManager to keep track of the device info
 const devMan = new DeviceManager(dbConn, wsServer.broadcastDevices);
 httpServer.registerReceivedReportMsgHandler(devMan.receivedReportMsg);
-wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
+// wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
 
 dbConn.connect(() => devMan.fetchDevices());
 
