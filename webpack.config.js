@@ -12,19 +12,19 @@ module.exports = {
     filename: 'bundle.js'
   },
   module: {
-    loaders: [
+    rules: [
       { // Bundle JS and JSX files
         test: /\.jsx?/,
         include: APP_DIR,
-        loader: 'babel-loader',
+        use: 'babel-loader',
       },
       { // Bundle SVG files
         test: /\.svg$/,
-        loader: 'raw-loader',
+        use: 'raw-loader',
       },
       { // Bundle CSS files
         test: /\.css$/,
-        loaders: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader'],
         include: APP_DIR,
       },
     ]
