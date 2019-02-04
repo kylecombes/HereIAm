@@ -6,17 +6,23 @@ export default class IfaceInfo extends React.Component {
 
         let wifiElem = null;
         if (this.props.hasOwnProperty('wifi')) {
-            const wifi = this.props.wifi;
+            const {
+              ssid,
+              encryption,
+              signalStrength,
+              quality,
+            } = this.props.wifi;
+            const encryptionMsg = encryption ? encryption.toUpperCase() : 'None';
 
             wifiElem = <div className="iface-wifi cell small-12 medium-6 grid-x">
                 <span className="subsection-title cell small-12">SSID</span>
-                <span className="subsection-details cell small-12">{wifi.ssid}</span>
+                <span className="subsection-details cell small-12">{ssid}</span>
                 <span className="subsection-title cell small-12">Encryption</span>
-                <span className="subsection-details cell small-12">{wifi.encryption.toUpperCase()}</span>
+                <span className="subsection-details cell small-12">{encryptionMsg}</span>
                 <span className="subsection-title cell small-12">Signal strength</span>
-                <span className="subsection-details cell small-12">{wifi.signalStrength}<span className="dbm">dBm</span></span>
+                <span className="subsection-details cell small-12">{signalStrength}<span className="dbm">dBm</span></span>
                 <span className="subsection-title cell small-12">Quality</span>
-                <span className="subsection-details cell small-12">{wifi.quality}</span>
+                <span className="subsection-details cell small-12">{quality}</span>
             </div>;
         }
 
