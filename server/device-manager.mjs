@@ -37,15 +37,6 @@ export default class DeviceManager {
         });
     }
 
-    /**
-     * Handles responding to a POST request from the Python client.
-     * @param {string} uuid - the unique identifier of the reporting device
-     * @param {object} msg - the POST request body
-     */
-    receivedReportMsg(uuid, msg) {
-        const dev = this.parseDeviceJSON(msg);
-        return this.dbConn.saveDevice(uuid, dev);
-    }
 
   static parseDeviceJSON(postData) {
     const data = {}; // Data to be saved to db

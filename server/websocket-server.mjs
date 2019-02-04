@@ -51,14 +51,13 @@ export default class WebSocketServer {
         // }
     }
 
-
-    broadcastDevices(msg, socket) {
+    broadcastDevices() {
         this.deviceManager.getDevices()
           .then(devices => {
             const connectedDevices = Object.values(this.io.sockets.connected);
             if (connectedDevices.length > 0) {
               connectedDevices.forEach((ws) => {
-                ws.emit('devices', msg);
+                ws.emit('devices', devices);
               });
             }
           });

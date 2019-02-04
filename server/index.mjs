@@ -26,7 +26,15 @@ dbConn.connect().then(() => {
   // Initialize the WebSockets server
   const wsServer = new WebSocketServer(devMan);
 
-  httpServer.registerReceivedReportMsgHandler(devMan.receivedReportMsg);
+  httpServer.registerReceivedReportMsgHandler((uuid, msg, res) => {
+    const dev = DeviceManager.parseDeviceJSON(msg);
+    dbConn.saveDevice(uuid, dev)
+      .then(() => {
+        res.sendStatus(200);
+        wsServer.broadcastDevices();
+      })
+      .catch(err => res.status(500).send(err));
+  });
   // wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
 
   // Start the WebSockets server
