@@ -1,7 +1,6 @@
 import argparse
 import json
 import netifaces
-from os import environ
 import os
 import platform
 import re
@@ -79,13 +78,14 @@ def get_os_info(json_encode=False):
 
 
 # Try to get the server URI from an environment variable
-server = environ.get('HEREIAM_SERVER')
+server = os.environ.get('HEREIAM_SERVER')
 
 # Parse any passed arguments
 parser = argparse.ArgumentParser(description='Reporting client for HereIAm'
                                  + 'dynamic IP address reporter.')
 parser.add_argument('-s', '--server', help='the server address (overrides any '
                     + 'set environment variable)')
+parser.add_argument('-c', '--config', help='path to config file')
 args = parser.parse_args()
 if args.server:
     server = args.server
@@ -94,27 +94,29 @@ if args.server:
 if server:
 
     # Determine this device's UID
-    homeDir = os.environ['HOME']
-    dataDir = os.path.join(homeDir, '.hereiam')
-    uidFilePath = os.path.join(dataDir, 'uid')
+    if args.config:
+        configFilePath = args.config
+    else:
+        configFilePath = os.path.expanduser('~/.config/hereiam')
 
     # Create ~/.ifacereporter if it does not exist
-    if not os.path.exists(dataDir):
-        os.makedirs(dataDir)
+    configFileDir = '/'.join(configFilePath.split('/')[:-1])
+    if not os.path.exists(configFileDir):
+        os.makedirs(configFileDir)
 
-    if os.path.isfile(uidFilePath):  # Read the UUID if one already exists
-        f = open(uidFilePath, 'r')
+    if os.path.isfile(configFilePath):  # Read the UUID if one already exists
+        f = open(configFilePath, 'r')
         try:
             uid = f.read()
             print('Read UUID:', uid)
         finally:
             f.close()
     else:  # Generate and save a UUID if one does not already exist
-        uid = uuid.uuid4()  # Generate random unique identifier
-        f = open(uidFilePath, 'w+')
+        uid = str(uuid.uuid4())  # Generate random unique identifier
+        f = open(configFilePath, 'w+')
         try:
-            print('Attempting to write {} to {}'.format(uid, uidFilePath))
-            f.write(str(uid))
+            print('Attempting to write {} to {}'.format(uid, configFilePath))
+            f.write(uid)
             print('Successfully wrote to file')
         finally:
             f.close()
