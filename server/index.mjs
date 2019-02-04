@@ -7,7 +7,7 @@ import WebSocketServer from './websocket-server.mjs';
 
 // Try loading environment variables from a .env file
 if (fs.existsSync('./.env')) {
-    dotenv.config();
+  dotenv.config();
 }
 
 // Figure out which port we're going to be listening for connections on
@@ -15,20 +15,20 @@ const port = process.env.PORT || 1234;
 
 // Connect to MongoDB
 const dbConn = new DatabaseConnection();
+dbConn.connect().then(() => {
+  // Create a DeviceManager to keep track of the device info
+  const devMan = new DeviceManager(dbConn);
+  // devMan.fetchDevices();
 
-// Start the HTTP server
-const httpServer = new HttpServer(port);
+  // Start the HTTP server
+  const httpServer = new HttpServer(port);
 
-// Create a DeviceManager to keep track of the device info
-const devMan = new DeviceManager(dbConn);
+  // Initialize the WebSockets server
+  const wsServer = new WebSocketServer(devMan);
 
-// Initialize the WebSockets server
-const wsServer = new WebSocketServer(devMan);
+  httpServer.registerReceivedReportMsgHandler(devMan.receivedReportMsg);
+  // wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
 
-httpServer.registerReceivedReportMsgHandler(devMan.receivedReportMsg);
-// wsServer.registerMessageListener('connected', wsServer.broadcastDevices);
-
-dbConn.connect(() => devMan.fetchDevices());
-
-// Start the WebSockets server
-wsServer.start(httpServer.getHTTPServer());
+  // Start the WebSockets server
+  wsServer.start(httpServer.getHTTPServer());
+});
