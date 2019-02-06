@@ -9,7 +9,7 @@ class App extends React.Component {
         super();
 
         this.state = {
-            server: window.server,
+            server: window.SERVER_URI,
         };
     }
 
