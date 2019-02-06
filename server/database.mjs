@@ -35,7 +35,7 @@ export default class DatabaseConnection {
           // We have all the information we need to connect, so attempt to do so
           const mongoUri = `mongodb+srv://${username}:${password}@${cluster}/${dbName}`;
 
-          MongoClient.connect(mongoUri, function (err, client) {
+          MongoClient.connect(mongoUri, { useNewUrlParser: true }, function (err, client) {
             if (err) {
               const errorFull = `Error connecting to MongoDB instance:\n${err}`;
               console.error(errorFull);
