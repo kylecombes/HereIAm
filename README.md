@@ -30,3 +30,26 @@ upon connecting to any network. This (hopefully) ensures that the server will al
 
 5) Test the file by running `/etc/network/if-up.d/hereiam`. The device should appear on the server.
 
+## Right way
+
+1) `sudo systemctl edit --force --full hereiam.service`
+
+2) Enter the following:
+    ```bash
+    [Unit]
+    Description=HereIAm daemon
+    After=network-online.target
+    
+    [Service]
+    Type=simple
+    User=pi
+    WorkingDirectory=/home/pi
+    ExecStart=/usr/bin/python3 /home/pi/hereiam/client/main.py --server=https://hereiam-devices.herokuapp.com
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
+   
+4) Run it `sudo systemctl start myfirst`
+   
+3) Run it at boot `sudo systemctl enable myfirst`
